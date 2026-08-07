@@ -1,0 +1,21 @@
+{
+  "name": "eks-gpu-communication-lab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GPU data-path, NCCL, NIXL, NVSwitch, and EFA learning and validation on Amazon EKS",
+  "type": "module",
+  "scripts": {
+    "build:diagrams": "node tools/diagrams/build_interconnect_diagrams.mjs && node tools/diagrams/build_p5_efa_stack_diagrams.mjs",
+    "check:links": "node scripts/check-markdown-links.mjs",
+    "check:public": "bash scripts/check-public-content.sh",
+    "check:manifests": "bash scripts/validate-manifests.sh",
+    "check:scripts": "bash scripts/validate-helper-scripts.sh",
+    "check": "npm run build:diagrams && npm run check:manifests && npm run check:scripts && npm run check:links && npm run check:public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "sharp": "0.35.3"
+  }
+}

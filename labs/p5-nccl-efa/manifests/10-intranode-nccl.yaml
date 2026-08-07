@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: p5-nccl-intranode
+  namespace: gpu-communication-lab
+  labels:
+    app: p5-nccl-intranode
+spec:
+  restartPolicy: Never
+  nodeSelector:
+    workload: p5-efa-lab
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: p5-efa-lab
+      effect: NoSchedule
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+  containers:
+    - name: p5-nccl-intranode
+      image: public.ecr.aws/deep-learning-containers/pytorch-training:2.9.0-gpu-py312-cu130-ubuntu22.04-ec2@sha256:c5af70b4143d7b1878567cc198c5a7961aff15e8c59fec35c2fb3cbd097cddcd
+      imagePullPolicy: IfNotPresent
+      command:
+        - bash
+        - -lc
+        - >-
+          NCCL_DEBUG=INFO
+          NCCL_DEBUG_SUBSYS=INIT,GRAPH,P2P,NVLS
+          torchrun --standalone --nproc_per_node=8
+          /opt/test/efa_nccl_preflight.py
+      resources:
+        requests:
+          cpu: "8"
+          memory: 16Gi
+          nvidia.com/gpu: "8"
+        limits:
+          nvidia.com/gpu: "8"
+      volumeMounts:
+        - name: preflight
+          mountPath: /opt/test
+          readOnly: true
+        - name: dshm
+          mountPath: /dev/shm
+  volumes:
+    - name: preflight
+      configMap:
+        name: p5-nccl-preflight
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        sizeLimit: 32Gi
